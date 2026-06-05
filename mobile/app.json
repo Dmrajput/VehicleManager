@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Vehicle Manager",
+    "slug": "vehicle-manager",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "vehiclemanager",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#2563EB"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vehiclemanager.app"
+    },
+    "android": {
+      "package": "com.vehiclemanager.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#2563EB"
+      }
+    },
+    "web": {},
+    "plugins": [
+      "expo-notifications",
+      "expo-asset",
+      "expo-font"
+    ],
+    "extra": {
+      "apiBaseUrl": "http://10.0.2.2:5000/api"
+    }
+  }
+}
