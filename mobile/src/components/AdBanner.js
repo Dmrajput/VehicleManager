@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { ADMOB } from '../constants';
 import { colors, radius, spacing } from '../theme';
 
 /**
@@ -12,6 +13,9 @@ import { colors, radius, spacing } from '../theme';
  * See README for full steps.
  */
 export default function AdBanner({ style }) {
+  // Respect the EXPO_PUBLIC_ADS_ENABLED flag from .env.
+  if (!ADMOB.enabled) return null;
+
   return (
     <View style={[styles.wrap, style]}>
       <Text style={styles.label}>Ad</Text>

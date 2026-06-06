@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Card } from '../../components';
 import useAuthStore from '../../store/authStore';
+import { APP_NAME, PRIVACY_POLICY_URL, STORE_URL } from '../../constants';
 import { colors, spacing, radius } from '../../theme';
 
 function Row({ icon, label, value, onPress, right }) {
@@ -38,12 +39,12 @@ export default function ProfileScreen({ navigation }) {
 
   const onShare = () => {
     Share.share({
-      message: 'Manage all your vehicle expenses, services and reminders with Vehicle Manager! 🚗',
+      message: `Manage all your vehicle expenses, services and reminders with ${APP_NAME}! 🚗`,
     }).catch(() => {});
   };
 
   const onRate = () => {
-    Linking.openURL('https://play.google.com/store').catch(() => {});
+    Linking.openURL(STORE_URL).catch(() => {});
   };
 
   const onLogout = () => {
@@ -99,7 +100,7 @@ export default function ProfileScreen({ navigation }) {
             <Row
               icon={'\uD83D\uDD12'}
               label="Privacy Policy"
-              onPress={() => Linking.openURL('https://example.com/privacy').catch(() => {})}
+              onPress={() => Linking.openURL(PRIVACY_POLICY_URL).catch(() => {})}
             />
           </Card>
         </View>
@@ -108,7 +109,7 @@ export default function ProfileScreen({ navigation }) {
           <Text style={styles.logoutText}>Logout</Text>
         </Pressable>
 
-        <Text style={styles.version}>Vehicle Manager v1.0.0</Text>
+        <Text style={styles.version}>{APP_NAME} v1.0.0</Text>
       </ScrollView>
     </SafeAreaView>
   );

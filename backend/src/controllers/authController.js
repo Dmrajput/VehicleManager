@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const asyncHandler = require('../utils/asyncHandler');
 const { generateToken, generateOTP } = require('../utils/token');
+const { sendOtpSms, isConfigured: isSmsConfigured } = require('../services/sms');
 
 const otpExpiryMinutes = () => parseInt(process.env.OTP_EXPIRY_MINUTES || '5', 10);
 const isDevMode = () => String(process.env.OTP_DEV_MODE || 'true') === 'true';
@@ -11,6 +12,27 @@ const issueOtp = (user) => {
   user.otpExpiresAt = new Date(Date.now() + otpExpiryMinutes() * 60 * 1000);
   return code;
 };
+
+// Try to deliver the OTP via SMS. Returns true if it was sent.
+const deliverOtp = async (mobile, code) => {
+  if (!isSmsConfigured()) return false;
+  try {
+    const result = await sendOtpSms(mobile, code);
+    if (result.sent) {
+      console.log(`OTP SMS sent to ${mobile} (sid: ${result.sid})`);
+      return true;
+    }
+    return false;
+  } catch (err) {
+    console.error(`Failed to send OTP SMS to ${mobile}:`, err.message);
+    return false;
+  }
+};
+
+// Include the OTP in the API response only in dev mode, or when SMS delivery
+// is unavailable (so testing without SMS still works).
+const otpResponseExtras = (code, smsSent) =>
+  isDevMode() || !smsSent ? { devOtp: code } : {};
 
 // @route POST /api/auth/register
 const register = asyncHandler(async (req, res) => {
@@ -35,10 +57,12 @@ const register = asyncHandler(async (req, res) => {
   const code = issueOtp(user);
   await user.save();
 
+  const smsSent = await deliverOtp(mobile, code);
+
   res.status(201).json({
     success: true,
-    message: 'OTP sent for verification',
-    data: { mobile, ...(isDevMode() ? { devOtp: code } : {}) },
+    message: smsSent ? 'OTP sent via SMS' : 'OTP generated',
+    data: { mobile, ...otpResponseExtras(code, smsSent) },
   });
 });
 
@@ -59,10 +83,12 @@ const login = asyncHandler(async (req, res) => {
   const code = issueOtp(user);
   await user.save();
 
+  const smsSent = await deliverOtp(mobile, code);
+
   res.json({
     success: true,
-    message: 'OTP sent',
-    data: { mobile, isNewUser: !user.isVerified, ...(isDevMode() ? { devOtp: code } : {}) },
+    message: smsSent ? 'OTP sent via SMS' : 'OTP generated',
+    data: { mobile, isNewUser: !user.isVerified, ...otpResponseExtras(code, smsSent) },
   });
 });
 
@@ -90,6 +116,9 @@ const verifyOtp = asyncHandler(async (req, res) => {
     throw new Error('Invalid OTP');
   }
 
+  // Generate the token first so a signing failure never consumes the OTP.
+  const token = generateToken(user._id);
+
   user.isVerified = true;
   user.otpCode = null;
   user.otpExpiresAt = null;
@@ -99,7 +128,7 @@ const verifyOtp = asyncHandler(async (req, res) => {
     success: true,
     message: 'OTP verified',
     data: {
-      token: generateToken(user._id),
+      token,
       user: user.toSafeJSON(),
     },
   });
