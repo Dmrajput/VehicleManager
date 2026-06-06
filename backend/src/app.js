@@ -31,6 +31,17 @@ const apiLimiter = rateLimit({
 });
 app.use('/api', apiLimiter);
 
+// Root route so health checks / browser visits to "/" get a friendly 200
+// instead of a 404 (Render pings the root path).
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Vehicle Manager API',
+    health: '/api/health',
+    version: '1.0.0',
+  });
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'Vehicle Manager API is running', time: new Date() });
 });
