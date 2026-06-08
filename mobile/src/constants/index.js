@@ -97,7 +97,34 @@ export const SERVICE_TYPES = ['General Service', 'Oil Change', 'Repair', 'Washin
 export const REMINDER_TYPES = ['Service', 'Insurance', 'PUC'];
 
 // ---- Notifications --------------------------------------------------------
-// Days before a due date to fire reminder notifications.
+// Hour of the day (local device time, 24h) at which reminders fire. Default 9 AM.
+export const NOTIFICATION_HOUR = asNumber(process.env.EXPO_PUBLIC_NOTIFICATION_HOUR, 9);
+
+// Minutes added per vehicle so multiple vehicles do not all fire at once.
+// Vehicle #1 -> 09:00, #2 -> 09:15, #3 -> 09:30, ...
+export const NOTIFICATION_VEHICLE_OFFSET_MINUTES = asNumber(
+  process.env.EXPO_PUBLIC_NOTIFICATION_VEHICLE_OFFSET,
+  15
+);
+
+// How many days BEFORE the due date the daily reminders should start. A vehicle
+// reminder fires once per day, every day, from (dueDate - window) through the
+// due date itself, then stops automatically. Keeps far-future dates (e.g. an
+// insurance a year away) from scheduling hundreds of notifications.
+export const REMINDER_WINDOW_DAYS = asNumber(process.env.EXPO_PUBLIC_REMINDER_WINDOW_DAYS, 30);
+
+// Hard cap on total OS-scheduled notifications. iOS allows max 64 pending local
+// notifications; we stay under that and schedule the soonest ones first.
+export const MAX_SCHEDULED_NOTIFICATIONS = asNumber(
+  process.env.EXPO_PUBLIC_MAX_SCHEDULED_NOTIFICATIONS,
+  60
+);
+
+// Android notification channel id used for all reminders.
+export const NOTIFICATION_CHANNEL_ID = 'reminders';
+
+// Legacy: kept for backward compatibility with older .env files. No longer used
+// by the scheduler (reminders are now daily within REMINDER_WINDOW_DAYS).
 export const REMINDER_DAYS_BEFORE = asNumberList(
   process.env.EXPO_PUBLIC_REMINDER_DAYS,
   [30, 15, 7, 1]

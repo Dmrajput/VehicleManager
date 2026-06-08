@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { vehicleApi, fuelApi, serviceApi } from '../api';
+import { cancelVehicleNotifications } from '../services/notifications';
 
 export const useVehicleStore = create((set, get) => ({
   vehicles: [],
@@ -32,6 +33,8 @@ export const useVehicleStore = create((set, get) => ({
 
   deleteVehicle: async (id) => {
     await vehicleApi.remove(id);
+    // Remove any pending reminders for this vehicle so they don't keep firing.
+    await cancelVehicleNotifications(id);
     set({ vehicles: get().vehicles.filter((v) => v._id !== id) });
   },
 
