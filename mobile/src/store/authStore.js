@@ -26,11 +26,21 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  requestOtp: async ({ mobile, name, email, isSignup }) => {
+  // Persist a logged-in session (token + user) to storage and state.
+  persistSession: async ({ token, user }) => {
+    await AsyncStorage.multiSet([
+      [STORAGE_KEYS.TOKEN, token],
+      [STORAGE_KEYS.USER, JSON.stringify(user)],
+    ]);
+    set({ token, user });
+    return user;
+  },
+
+  requestOtp: async ({ mobile, name, email, password, isSignup }) => {
     set({ loading: true });
     try {
       const res = isSignup
-        ? await authApi.register({ mobile, name, email })
+        ? await authApi.register({ mobile, name, email, password })
         : await authApi.login({ mobile });
       return res?.data; // may include devOtp in dev mode
     } finally {
@@ -42,13 +52,51 @@ export const useAuthStore = create((set, get) => ({
     set({ loading: true });
     try {
       const res = await authApi.verifyOtp({ mobile, otp });
-      const { token, user } = res.data;
-      await AsyncStorage.multiSet([
-        [STORAGE_KEYS.TOKEN, token],
-        [STORAGE_KEYS.USER, JSON.stringify(user)],
-      ]);
-      set({ token, user });
-      return user;
+      return await get().persistSession(res.data);
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  // Password login (no OTP).
+  loginWithPassword: async ({ mobile, password }) => {
+    set({ loading: true });
+    try {
+      const res = await authApi.loginPassword({ mobile, password });
+      return await get().persistSession(res.data);
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  // Forgot-password: request a reset OTP. Returns data (may include devOtp).
+  forgotPassword: async ({ mobile }) => {
+    set({ loading: true });
+    try {
+      const res = await authApi.forgotPassword({ mobile });
+      return res?.data;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  // Verify the reset OTP and get a short-lived reset token.
+  verifyResetOtp: async ({ mobile, otp }) => {
+    set({ loading: true });
+    try {
+      const res = await authApi.verifyResetOtp({ mobile, otp });
+      return res?.data; // { resetToken }
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  // Set a new password using the reset token (or mobile+otp fallback).
+  resetPassword: async ({ mobile, otp, resetToken, newPassword }) => {
+    set({ loading: true });
+    try {
+      const res = await authApi.resetPassword({ mobile, otp, resetToken, newPassword });
+      return res?.data;
     } finally {
       set({ loading: false });
     }

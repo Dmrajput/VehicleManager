@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { GradientHeader, TextField, PrimaryButton } from '../../components';
+import { GradientHeader, TextField, PasswordField, PrimaryButton } from '../../components';
 import useAuthStore from '../../store/authStore';
 import { colors, spacing } from '../../theme';
 
+const MIN_PASSWORD = 6;
+
 export default function SignupScreen({ navigation }) {
-  const [form, setForm] = useState({ name: '', mobile: '', email: '' });
+  const [form, setForm] = useState({
+    name: '',
+    mobile: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
   const [error, setError] = useState('');
   const requestOtp = useAuthStore((s) => s.requestOtp);
   const loading = useAuthStore((s) => s.loading);
@@ -15,9 +23,19 @@ export default function SignupScreen({ navigation }) {
   const onSubmit = async () => {
     if (!form.name.trim()) return setError('Please enter your full name');
     if (!/^\d{10}$/.test(form.mobile)) return setError('Enter a valid 10-digit mobile number');
+    if (form.password.length < MIN_PASSWORD)
+      return setError(`Password must be at least ${MIN_PASSWORD} characters`);
+    if (form.password !== form.confirmPassword) return setError('Passwords do not match');
+
     setError('');
     try {
-      const data = await requestOtp({ ...form, isSignup: true });
+      const data = await requestOtp({
+        name: form.name.trim(),
+        mobile: form.mobile,
+        email: form.email.trim(),
+        password: form.password,
+        isSignup: true,
+      });
       navigation.navigate('Otp', { mobile: form.mobile, devOtp: data?.devOtp });
     } catch (e) {
       setError(e.message);
@@ -27,10 +45,7 @@ export default function SignupScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <GradientHeader title="Create Account" onBack={() => navigation.goBack()} />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1 }}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <Text style={styles.intro}>Tell us a bit about you to get started.</Text>
 
@@ -50,6 +65,18 @@ export default function SignupScreen({ navigation }) {
             placeholder="you@example.com"
             keyboardType="email-address"
             autoCapitalize="none"
+          />
+          <PasswordField
+            label="Password"
+            value={form.password}
+            onChangeText={setField('password')}
+            placeholder="At least 6 characters"
+          />
+          <PasswordField
+            label="Confirm Password"
+            value={form.confirmPassword}
+            onChangeText={setField('confirmPassword')}
+            placeholder="Re-enter password"
           />
 
           {error ? <Text style={styles.error}>{error}</Text> : null}

@@ -4,6 +4,10 @@ export const authApi = {
   register: (payload) => client.post('/auth/register', payload),
   login: (payload) => client.post('/auth/login', payload),
   verifyOtp: (payload) => client.post('/auth/verify-otp', payload),
+  loginPassword: (payload) => client.post('/auth/login-password', payload),
+  forgotPassword: (payload) => client.post('/auth/forgot-password', payload),
+  verifyResetOtp: (payload) => client.post('/auth/verify-reset-otp', payload),
+  resetPassword: (payload) => client.post('/auth/reset-password', payload),
 };
 
 export const vehicleApi = {

@@ -6,29 +6,25 @@ import { colors, spacing } from '../../theme';
 
 const OTP_LENGTH = 6;
 
-export default function OtpScreen({ route, navigation }) {
+export default function ResetOtpScreen({ route, navigation }) {
   const { mobile, devOtp } = route.params || {};
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
 
-  const verifyOtp = useAuthStore((s) => s.verifyOtp);
-  const requestOtp = useAuthStore((s) => s.requestOtp);
+  const verifyResetOtp = useAuthStore((s) => s.verifyResetOtp);
+  const forgotPassword = useAuthStore((s) => s.forgotPassword);
   const loading = useAuthStore((s) => s.loading);
 
-  // Prefill in dev mode for convenience.
   useEffect(() => {
     if (devOtp) setCode(String(devOtp).slice(0, OTP_LENGTH));
   }, [devOtp]);
 
   const onVerify = async () => {
-    if (code.length !== OTP_LENGTH) {
-      setError('Please enter the full 6-digit code');
-      return;
-    }
+    if (code.length !== OTP_LENGTH) return setError('Please enter the full 6-digit code');
     setError('');
     try {
-      await verifyOtp({ mobile, otp: code });
-      // Navigation switches automatically once the token is set in the store.
+      const data = await verifyResetOtp({ mobile, otp: code });
+      navigation.navigate('NewPassword', { mobile, resetToken: data?.resetToken });
     } catch (e) {
       setError(e.message);
     }
@@ -37,7 +33,7 @@ export default function OtpScreen({ route, navigation }) {
   const onResend = async () => {
     setError('');
     try {
-      const data = await requestOtp({ mobile, isSignup: false });
+      const data = await forgotPassword({ mobile });
       if (data?.devOtp) setCode(String(data.devOtp).slice(0, OTP_LENGTH));
     } catch (e) {
       setError(e.message);
@@ -57,7 +53,7 @@ export default function OtpScreen({ route, navigation }) {
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <PrimaryButton title="Verify & Continue" onPress={onVerify} loading={loading} />
+        <PrimaryButton title="Verify" onPress={onVerify} loading={loading} />
 
         <Pressable onPress={onResend} style={styles.resend}>
           <Text style={styles.resendText}>

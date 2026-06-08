@@ -4,6 +4,8 @@ export { default as GradientHeader } from './GradientHeader';
 export { default as TextField } from './TextField';
 export { default as SelectField } from './SelectField';
 export { default as DateField } from './DateField';
+export { default as PasswordField } from './PasswordField';
+export { default as OtpInput } from './OtpInput';
 export { default as ChipSelector } from './ChipSelector';
 export { default as EmptyState } from './EmptyState';
 export { default as ErrorState } from './ErrorState';
