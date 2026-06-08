@@ -4,11 +4,13 @@
     "slug": "vehicle-manager",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "scheme": "vehiclemanager",
     "userInterfaceStyle": "light",
     "splash": {
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#2563EB"
+      "backgroundColor": "#000000"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -20,10 +22,13 @@
     "android": {
       "package": "com.vehiclemanager.app",
       "adaptiveIcon": {
-        "backgroundColor": "#2563EB"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#000000"
       }
     },
-    "web": {},
+    "web": {
+      "favicon": "./assets/icon.png"
+    },
     "plugins": [
       "expo-notifications",
       "expo-asset",

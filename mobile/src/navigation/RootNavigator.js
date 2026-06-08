@@ -6,6 +6,8 @@ import AuthNavigator from './AuthNavigator';
 import TabNavigator from './TabNavigator';
 import AddVehicleScreen from '../screens/Vehicles/AddVehicleScreen';
 import VehicleDetailsScreen from '../screens/Vehicles/VehicleDetailsScreen';
+import EditRemindersScreen from '../screens/Vehicles/EditRemindersScreen';
+import ReminderListScreen from '../screens/Vehicles/ReminderListScreen';
 import AddFuelScreen from '../screens/Fuel/AddFuelScreen';
 import AddServiceScreen from '../screens/Services/AddServiceScreen';
 import useAuthStore from '../store/authStore';
@@ -38,6 +40,8 @@ export default function RootNavigator() {
             <Stack.Screen name="Tabs" component={TabNavigator} />
             <Stack.Screen name="AddVehicle" component={AddVehicleScreen} />
             <Stack.Screen name="VehicleDetails" component={VehicleDetailsScreen} />
+            <Stack.Screen name="ReminderList" component={ReminderListScreen} />
+            <Stack.Screen name="EditReminders" component={EditRemindersScreen} />
             <Stack.Screen name="AddFuel" component={AddFuelScreen} />
             <Stack.Screen name="AddService" component={AddServiceScreen} />
           </>

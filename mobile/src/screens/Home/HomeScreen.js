@@ -53,7 +53,17 @@ export default function HomeScreen({ navigation }) {
     load();
   };
 
-  const topReminders = reminders.slice(0, 3);
+  // Reminders come from the API already sorted by soonest due date. Keep the
+  // most-urgent reminder per vehicle so every vehicle is represented on Home.
+  const remindersByVehicle = [];
+  const seenVehicles = new Set();
+  reminders.forEach((r) => {
+    const key = String(r.vehicleId);
+    if (!seenVehicles.has(key)) {
+      seenVehicles.add(key);
+      remindersByVehicle.push(r);
+    }
+  });
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -99,12 +109,22 @@ export default function HomeScreen({ navigation }) {
           />
         </View>
 
-        <SectionHeader title="Reminders" actionLabel="View All" onAction={() => navigation.navigate('Vehicles')} />
+        <SectionHeader title="Reminders" actionLabel="View All" onAction={() => navigation.navigate('ReminderList')} />
         {loading ? (
           <ListSkeleton count={2} />
-        ) : topReminders.length ? (
-          topReminders.map((r, i) => (
-            <ReminderCard key={`${r.vehicleId}-${r.type}-${i}`} reminder={r} style={{ marginBottom: spacing.md }} />
+        ) : remindersByVehicle.length ? (
+          remindersByVehicle.map((r, i) => (
+            <ReminderCard
+              key={`${r.vehicleId}-${r.type}-${i}`}
+              reminder={r}
+              onPress={() =>
+                navigation.navigate('ReminderList', {
+                  vehicleId: r.vehicleId,
+                  vehicleName: r.vehicleName,
+                })
+              }
+              style={{ marginBottom: spacing.md }}
+            />
           ))
         ) : (
           <Card>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { colors, radius, spacing, shadow } from '../theme';
 import { formatDate, daysLeftLabel } from '../utils/format';
 
@@ -16,20 +16,34 @@ const typeIcon = {
   PUC: '\uD83C\uDF31',
 };
 
-export default function ReminderCard({ reminder, style }) {
+export default function ReminderCard({ reminder, style, onPress }) {
   const palette = statusColor[reminder.status] || statusColor.upcoming;
-  return (
-    <View style={[styles.card, style]}>
+
+  const inner = (
+    <>
       <View style={[styles.iconWrap, { backgroundColor: palette.bg }]}>
         <Text style={styles.icon}>{typeIcon[reminder.type] || '\u23F0'}</Text>
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={styles.title}>{reminder.type} Due</Text>
+        <Text style={styles.title} numberOfLines={1}>
+          {reminder.vehicleName ? `${reminder.type} \u2022 ${reminder.vehicleName}` : `${reminder.type} Due`}
+        </Text>
         <Text style={styles.date}>{formatDate(reminder.dueDate)}</Text>
       </View>
       <Text style={[styles.days, { color: palette.tint }]}>{daysLeftLabel(reminder.daysLeft)}</Text>
-    </View>
+      {onPress ? <Text style={styles.chevron}>{'\u203A'}</Text> : null}
+    </>
   );
+
+  if (onPress) {
+    return (
+      <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && { opacity: 0.85 }, style]}>
+        {inner}
+      </Pressable>
+    );
+  }
+
+  return <View style={[styles.card, style]}>{inner}</View>;
 }
 
 const styles = StyleSheet.create({
@@ -53,4 +67,5 @@ const styles = StyleSheet.create({
   title: { fontSize: 15, fontWeight: '600', color: colors.text },
   date: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
   days: { fontSize: 12, fontWeight: '700' },
+  chevron: { fontSize: 22, color: colors.textMuted, marginLeft: spacing.sm },
 });

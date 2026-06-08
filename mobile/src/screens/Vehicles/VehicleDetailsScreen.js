@@ -133,7 +133,18 @@ export default function VehicleDetailsScreen({ route, navigation }) {
           {tab === 'Overview' && <OverviewTab vehicle={vehicle} />}
           {tab === 'Service' && <ServiceTab services={data?.services} />}
           {tab === 'Fuel' && <FuelTab fuel={data?.fuel} />}
-          {tab === 'Reminders' && <RemindersTab reminders={reminders} />}
+          {tab === 'Reminders' && (
+            <RemindersTab
+              reminders={reminders}
+              onOpenList={() =>
+                navigation.navigate('ReminderList', {
+                  vehicleId: id,
+                  vehicleName: vehicle ? vehicleDisplayName(vehicle) : undefined,
+                })
+              }
+              onEdit={() => navigation.navigate('EditReminders', { vehicleId: id, vehicle })}
+            />
+          )}
 
           <View style={styles.actions}>
             <PrimaryButton
@@ -207,15 +218,26 @@ function FuelTab({ fuel }) {
   );
 }
 
-function RemindersTab({ reminders }) {
+function RemindersTab({ reminders, onOpenList, onEdit }) {
   if (!reminders?.length) {
-    return <EmptyState icon={'\u23F0'} title="No reminders" message="Add renewal dates to get reminders." />;
+    return (
+      <View>
+        <EmptyState icon={'\u23F0'} title="No reminders" message="Add renewal dates to get reminders." />
+        <PrimaryButton title="Edit Reminders" onPress={onEdit} style={{ marginTop: spacing.md }} />
+      </View>
+    );
   }
   return (
     <View>
       {reminders.map((r, i) => (
-        <ReminderCard key={`${r.type}-${i}`} reminder={r} style={{ marginBottom: spacing.md }} />
+        <ReminderCard
+          key={`${r.type}-${i}`}
+          reminder={r}
+          onPress={onOpenList}
+          style={{ marginBottom: spacing.md }}
+        />
       ))}
+      <PrimaryButton title="Edit Reminders" variant="outline" onPress={onEdit} />
     </View>
   );
 }
