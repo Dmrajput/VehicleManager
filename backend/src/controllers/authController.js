@@ -111,10 +111,10 @@ const login = asyncHandler(async (req, res) => {
     throw new Error('Mobile number is required');
   }
 
-  let user = await User.findOne({ mobile });
+  const user = await User.findOne({ mobile });
   if (!user) {
-    // Auto-create an unverified user so login doubles as signup for OTP flow.
-    user = new User({ mobile });
+    res.status(404);
+    throw new Error('Account not found. Please sign up first.');
   }
 
   const code = issueOtp(user);
